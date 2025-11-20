@@ -12,7 +12,7 @@ from utils_plots import (
 )
 
 # ===================================================
-# GLOBAL VARIABLES (must be before functions)
+# GLOBAL VARIABLES
 # ===================================================
 y_true_global = None
 out_df_global = None
@@ -70,7 +70,7 @@ mode = st.sidebar.selectbox(
 )
 
 # ===================================================
-# API CALL (SINGLE PREDICTION)
+# SINGLE PREDICTION
 # ===================================================
 def call_api(features_list, model_selected):
     payload = {"features": features_list}
@@ -81,7 +81,7 @@ def call_api(features_list, model_selected):
         return {"error": "Server unreachable"}, 500
 
 # ===================================================
-# API CALL (BATCH PREDICTION)
+# BATCH PREDICTION
 # ===================================================
 def predict_in_chunks(df, model_name="rf", chunk_size=4000):
     global y_true_global
@@ -96,7 +96,6 @@ def predict_in_chunks(df, model_name="rf", chunk_size=4000):
     st.info(f"Processing {n:,} rows in {chunks} chunks (~{chunk_size} rows/chunk).")
     progress = st.progress(0)
     status = st.empty()
-
     start_time = time.time()
 
     for i in range(chunks):
@@ -106,7 +105,6 @@ def predict_in_chunks(df, model_name="rf", chunk_size=4000):
         batch = df.iloc[s:e].values.tolist()
         payload = {"features": batch}
 
-        # backend call
         try:
             r = requests.post(
                 f"{API_BATCH}?model={model_name}",
@@ -136,11 +134,9 @@ def predict_in_chunks(df, model_name="rf", chunk_size=4000):
         eta = (elapsed / e) * (n - e) if e > 0 else 0
         status.text(f"Chunk {i+1}/{chunks} — {e}/{n} rows — ETA {eta/60:.2f} mins")
 
-    # attach predictions
     df["prediction"] = preds
     df["fraud_probability"] = probs
 
-    # attach true labels only if exist
     if y_true_global is not None:
         df["true_label"] = y_true_global.iloc[:len(df)]
 
@@ -193,7 +189,7 @@ if mode == "Upload CSV File (FAST MODE)":
     if uploaded_file:
         df = pd.read_csv(uploaded_file)
 
-        # store true labels
+        global y_true_global
         y_true_global = df["Class"].copy() if "Class" in df.columns else None
 
         df = df.drop(columns=["Class"], errors="ignore").iloc[:, :30]
@@ -204,28 +200,26 @@ if mode == "Upload CSV File (FAST MODE)":
         if st.button("🚀 Predict for All Rows"):
             out_df = predict_in_chunks(df, model_name=model)
 
-        if out_df is None:
-            st.error("Batch prediction failed — check backend logs.")
-            st.stop()
+            if out_df is None:
+                st.error("Batch prediction failed — check backend logs.")
+                st.stop()
 
-        st.success("Batch Prediction Complete!")
-        st.dataframe(out_df.head())
+            st.success("Batch Prediction Complete!")
+            st.dataframe(out_df.head())
 
-        # ⭐ Store for plotting later
-        
-        out_df_global = out_df
+            global out_df_global
+            out_df_global = out_df
 
-        # Download CSV
-        csv = out_df.to_csv(index=False).encode("utf-8")
-        st.download_button("📥 Download Predictions CSV", csv, "predictions.csv", "text/csv")
-
+            # Download CSV
+            csv = out_df.to_csv(index=False).encode("utf-8")
+            st.download_button("📥 Download Predictions CSV", csv, "predictions.csv", "text/csv")
 
 # ===================================================
 # VISUALIZATION BLOCK
 # ===================================================
 st.subheader("📊 Model Performance Visualizations")
 
-if y_true_global is not None and out_df_global is not None:
+if (y_true_global is not None) and (out_df_global is not None):
     try:
         plot_roc_curve(y_true_global, out_df_global["fraud_probability"])
         plot_precision_recall(y_true_global, out_df_global["fraud_probability"])
@@ -233,4 +227,4 @@ if y_true_global is not None and out_df_global is not None:
     except Exception as e:
         st.error(f"Visualization error: {e}")
 else:
-    st.info("📌 Visualizations appear only after batch prediction AND only when CSV contains the 'Class' column.")
+    st.info("📌 Visualizations appear only after batch prediction **and** only when CSV contains the 'Class' column.")
