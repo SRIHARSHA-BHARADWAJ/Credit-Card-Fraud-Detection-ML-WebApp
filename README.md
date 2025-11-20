@@ -1,131 +1,150 @@
-# 🔥 CREDIT CARD FRAUD DETECTION — Machine Learning • Streamlit Dashboard • FastAPI Backend
+<h1 align="center">
+  <span style="background: linear-gradient(90deg,#00C6FF,#0072FF,#4A00E0,#8E2DE2); 
+               -webkit-background-clip: text; 
+               color: transparent; 
+               font-size: 48px; 
+               font-weight: 900; 
+               display:inline-block;
+               animation: slide 3s infinite alternate ease-in-out;">
+  🔥 CREDIT CARD FRAUD DETECTION — Machine Learning • Streamlit • FastAPI
+  </span>
+</h1>
+
+<style>
+@keyframes slide {
+  0% { transform: translateX(-6px); }
+  100% { transform: translateX(6px); }
+}
+</style>
 
 <div align="center">
 
 ![Static Badge](https://img.shields.io/badge/ML-Fraud%20Detection-blue)
 ![Static Badge](https://img.shields.io/badge/Backend-FastAPI-009485)
 ![Static Badge](https://img.shields.io/badge/Frontend-Streamlit-FF4B4B)
-![Static Badge](https://img.shields.io/badge/Mode-Real%20Time%20%2B%20Batch-purple)
+![Static Badge](https://img.shields.io/badge/Input-RealTime%20%2B%20Batch-purple)
 ![Static Badge](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 
 </div>
 
 ---
 
-## 🌐 🚀 **LIVE WEB APPLICATION**
+## 🌐 ⚡ **LIVE DEMO**
 
 <div align="center">
-  
-### 👉 **[OPEN LIVE APP](https://credit-card-fraud-detection-ml-webapp.onrender.com)**
-
+  <a href="https://credit-card-fraud-detection-ml-webapp.onrender.com" target="_blank">
+    <img src="https://img.shields.io/badge/🚀 LIVE%20APP-00FF9C?style=for-the-badge&logo=streamlit&logoColor=white&labelColor=101010" 
+         alt="Live Demo Button"
+         style="animation: glow 2s infinite alternate;">
+  </a>
 </div>
+
+<style>
+@keyframes glow {
+  0% { filter: drop-shadow(0px 0px 4px #00FF9C); }
+  100% { filter: drop-shadow(0px 0px 12px #00FF9C); }
+}
+</style>
 
 ---
 
 ## 🧠 **Project Overview**
 
-A production-ready **Credit Card Fraud Detection System** with:
+A production-ready **Credit Card Fraud Detection System** featuring:
 
-- 🔹 Machine Learning Models (Logistic Regression, Random Forest)  
-- 🔹 FastAPI Backend for single & batch inference  
-- 🔹 Streamlit Premium Dark UI Dashboard  
-- 🔹 Automatic feature ordering & padding  
-- 🔹 Real-time probability scoring  
-- 🔹 Animated circular risk gauge  
-- 🔹 Bulk CSV prediction  
-- 🔹 Clean architecture + strong validations  
+- **FastAPI backend** for single & batch inference  
+- **Streamlit premium dashboard** with dark, compact UI  
+- **Machine Learning (Logistic Regression & Random Forest)**  
+- **Fully automated feature ordering (V1–V28, Amount, Time)**  
+- **Real-time probability scoring**  
+- **Animated circular fraud gauge**  
+- **CSV batch prediction support**  
+- **Optimized chunk-based inference for large datasets**  
+- **Backend fallback handling for 405/500 errors**
 
-This system detects **fraudulent transactions** by analyzing anonymized PCA-transformed banking features from the original Kaggle dataset.
-
-### ✔ Core Capabilities
-- **Single transaction prediction (instant)**
-- **Batch CSV processing (thousands of rows)**
-- **Normalized fraud probability (%)**
-- **Risk-level classification (Low / Elevated / High)**
-- **Adaptive sensitivity slider**
-- **Backend fallback logic (handles 405/500 errors gracefully)**
+This system detects fraudulent transactions based on PCA-transformed financial features from the Kaggle Credit Card Fraud dataset.
 
 ---
 
 ## 🎯 **Key Features**
 
 ### 🔍 1. Real-Time Fraud Detection
-Provide 6 feature inputs → system pads remaining 24 features → backend predicts:
+Provide 6 inputs → system pads remaining 24 → backend returns:
 
-- **Prediction (0 = Legit, 1 = Fraud)**
-- **Probability (%)**
-- **Risk level**
-- **Guided recommendations**
+- Fraud prediction (0/1)  
+- Probability (%)  
+- Risk level (Low / Elevated / High)  
+- Actionable guidance  
 
 ---
 
 ### 📊 2. Bulk CSV Fraud Analysis
-Upload a CSV with transaction records → system returns:
+Upload a CSV → backend automatically:
 
-- Predictions  
-- Fraud probabilities  
-- Automatic alignment to V1–V28 + Amount + Time  
-- Downloadable results file  
+- Aligns PCA feature order  
+- Performs chunked predictions  
+- Returns predictions + probabilities  
+- Lets you download the final CSV  
 
-Handles **4,000 rows per chunk** via optimized FastAPI batching.
+Handles **4,000 rows per chunk** → supports **100k+ rows smoothly**.
 
 ---
 
-### 🌀 3. Animated Risk Gauge
-A high-fidelity SVG circular gauge displays:
+### 🌀 3. High-Fidelity Animated Risk Gauge
+A custom SVG gauge showing:
 
 - Probability  
-- Adaptive glow  
-- Gradient stroke  
-- Smooth animation  
+- Neon gradient  
+- Center label  
+- Smooth stroke animation  
+- Glow highlights  
 
 ---
 
-### 🛡️ 4. Robust Backend (FastAPI)
-- Handles large JSON payloads  
-- Automatic model loading & caching  
-- Logistic Regression + Random Forest available  
-- Clean Pydantic models for validation  
+### 🛡️ 4. FastAPI Backend
+- Model caching  
+- Large JSON body handling  
+- Pydantic validation  
+- Error-safe fallback handling  
+- Endpoint-based model selection  
 
 ---
 
-### 🖥️ 5. Premium Streamlit UI
-- Fully customized dark theme  
-- Liquid-glass panels  
-- Compact, centered layout  
-- Responsive & minimal  
-- Predictive guidance statements  
-- Optional logs panel  
+### 🖥 5. Streamlit Dark Premium UI
+- Clean liquid-glass panels  
+- Perfect spacing  
+- Professional AIML styling  
+- Optional backend logs  
+- Compact, responsive, modern  
 
 ---
 
 ## 🏗️ **Architecture Diagram**
 
-               +-------------------------+
-               |    GitHub Repository    |
-               +-----------+-------------+
-                           |
-                           |   Code Push
-                           v
-               +-------------------------+
-               |         Render          |
-               |   FastAPI Backend API   |
-               +-----------+-------------+
-                           |
-                           |  JSON Request (POST)
-                           v
-               +-------------------------+
-               |     ML Model (pkl)      |
-               |  Logistic Regression /   |
-               |     Random Forest        |
-               +-----------+-------------+
-                           |
-                           |  Prediction + Probability
-                           v
-               +-------------------------+
-               |     Streamlit UI App    |
-               |  Real-time & CSV modes  |
-               +-------------------------+
+           +-------------------------+
+           |    GitHub Repository    |
+           +-----------+-------------+
+                       |
+                       |   Code Push
+                       v
+           +-------------------------+
+           |         Render          |
+           |   FastAPI Backend API   |
+           +-----------+-------------+
+                       |
+                       |  JSON Request (POST)
+                       v
+           +-------------------------+
+           |     ML Model (pkl)      |
+           | Logistic Regression/RF  |
+           +-----------+-------------+
+                       |
+                       | Prediction + Probability
+                       v
+           +-------------------------+
+           |     Streamlit UI App    |
+           | Real-time & CSV modes   |
+           +-------------------------+
 
 
 ---
@@ -134,49 +153,48 @@ A high-fidelity SVG circular gauge displays:
 
 Credit-Card-Fraud-Detection-ML-WebApp/
 │
-├── README.md # Documentation (You are here)
+├── README.md # Documentation
 ├── LICENSE # MIT License
 │
 ├── streamlit_app/
-│ └── app.py # Main Streamlit Dashboard (Final Premium UI)
+│ └── app.py # Streamlit Dashboard (Final Version)
 │
 ├── backend/
-│ ├── main.py # FastAPI app (prediction endpoints)
-│ ├── models/ # Stored ML models (.pkl)
+│ ├── main.py # FastAPI backend
+│ ├── models/ # ML Model Files (pkl)
 │ └── requirements.txt # Backend dependencies
 │
 └── utils/
-└── utils_plots.py # (Optional older plotting utilities; not used anymore) 
+└── utils_plots.py # (Legacy)
 
 
 ---
 
 ## 🧪 **Dataset (Kaggle)**
 
-Credit Card Fraud Dataset — 284,807 transactions
-
 | Feature | Description |
 |--------|-------------|
-| `V1`–`V28` | PCA-transformed anonymized banking features |
-| `Amount` | Transaction amount |
-| `Time` | Time delta between transactions |
-| `Class` | 0 = Legit, 1 = Fraud |
-
-Dataset originally from Kaggle.
+| V1–V28 | PCA-transformed features |
+| Amount | Transaction amount |
+| Time   | Time index |
+| Class  | 1 = Fraud, 0 = Legit |
 
 ---
 
-## 🚀 **Run Locally (Frontend)**
+## 🚀 **Run Locally — Frontend**
 
 ```bash
 cd streamlit_app
 pip install -r requirements.txt
 streamlit run app.py
 
-## 🚀 **Run Locally (Backend)**
+---
+## 🚀 **Run Locally — Backend**
+
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
+---
 
 🧭 API Endpoints
 ▶ Single Prediction
@@ -187,39 +205,58 @@ POST /predict?model=rf
 
 POST /predict-batch?model=rf
 
-▶ Get Models
+▶ List Models
 
-GET /get-models 
+GET /get-models
+
+---
 
 🚀 Deployment
 
-Backend and frontend deployed on Render as:
+Deployed using Render Cloud
 
-FastAPI web service
+FastAPI backend → Web Service
 
-Streamlit web app
+Streamlit App → Web App
 
-Model files stored in GitHub Releases and auto-downloaded by backend.
+Models pulled from GitHub Releases
 
-🛠️ Future Enhancements
+---
 
-🔹 Add Docker support (Dockerfile + containerized backend)
-🔹 Introduce GitHub Actions CI/CD
-🔹 Add user authentication
-🔹 Enable model versioning
-🔹 Add Explainability (SHAP)
-🔹 Add Fraud Score Calibration
-🔹 Add vectorized GPU inference for ultra-high throughput
-🔹 Add Redis caching for repeated predictions
+🛠 Future Enhancements
+
+Docker containerization
+
+GitHub Actions CI/CD
+
+SHAP Explainability Dashboard
+
+GPU-based vectorized inference
+
+User authentication
+
+Model A/B testing
+
+Redis-based caching
+
+Historical fraud analytics 
+
+analytics
+
+---
 
 📝 License
 
 MIT License © 2025 SRIHARSHA-BHARADWAJ
 
+---
+
 👨‍💻 Author
 
 Sriharsha Bharadwaj
-B.E. — Artificial Intelligence & Machine Learning
+B.E. Artificial Intelligence & Machine Learning
 B.M.S. College of Engineering, Bengaluru
-📧mailto:sriharsha.ai22@bmsce.ac.in
+
+📧 sriharsha.ai22@bmsce.ac.in
+
 🔗 GitHub: https://github.com/SRIHARSHA-BHARADWAJ
