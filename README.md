@@ -1,17 +1,12 @@
 <div align="center" style="padding:18px 0 6px 0;">
-  <img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=900&size=34&duration=1400&pause=300&color=00D4FF&center=true&vCenter=true&width=1100&lines=CREDIT+CARD+FRAUD+DETECTION;FASTAPI+%7C+STREAMLIT+%7C+ML+SYSTEM;REAL-TIME+AND+BATCH+PREDICTION" />
+  <img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=900&size=32&duration=1400&pause=300&color=00D4FF&center=true&vCenter=true&width=1000&lines=CREDIT+CARD+FRAUD+DETECTION;FASTAPI+%7C+STREAMLIT+%7C+ML+PIPELINE;REAL‑TIME+%2B+BATCH+PREDICTION" />
 </div>
 
 <div align="center" style="height:4px; width:320px; background:linear-gradient(90deg,#00E5FF,#0077FF,#00E5FF); border-radius:6px; filter:drop-shadow(0 0 8px #00E5FF); margin-top:4px; animation:underlineGlow 3s infinite ease-in-out;"></div>
 
 <div align="center" style="font-size:15px; color:#8fa3b5; margin-top:14px; margin-bottom:18px; animation:fadeInSub 1.2s ease forwards; opacity:0; max-width:850px; line-height:1.45;">
-A production-ready financial fraud detection pipeline featuring a FastAPI model-serving backend, 30‑feature aligned ML inference, Streamlit analytical dashboard, and optimized real‑time + batch prediction flow.
+A streamlined financial fraud detection pipeline combining a FastAPI inference backend, strict 30‑feature ML alignment, and a refined Streamlit analytics dashboard optimized for both real‑time and batch scoring.
 </div>
-
-<style>
-@keyframes fadeInSub {0%{opacity:0; transform:translateY(12px);}100%{opacity:1; transform:translateY(0);}}
-@keyframes underlineGlow {0%{filter:drop-shadow(0 0 4px #00E5FF);}50%{filter:drop-shadow(0 0 12px #00E5FF);}100%{filter:drop-shadow(0 0 4px #00E5FF);}}
-</style>
 
 <div align="center" style="margin-top:18px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
 
@@ -34,8 +29,6 @@ A production-ready financial fraud detection pipeline featuring a FastAPI model-
   <img src="https://img.shields.io/badge/Mode-RealTime%20%2B%20Batch-purple?style=flat-square" />
   <img src="https://img.shields.io/badge/Status-Production%20Grade-brightgreen?style=flat-square" />
 </p>
-
----
 
 ---
 
