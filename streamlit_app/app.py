@@ -229,6 +229,14 @@ if mode == "Upload CSV File (FAST MODE)":
 
     if uploaded_file:
         df = pd.read_csv(uploaded_file)
+
+        # Remove Class column if present
+        if "Class" in df.columns:
+            df = df.drop(columns=["Class"])
+
+# Ensure only 30 feature columns are used
+        df = df.iloc[:, :30]
+
         st.write("### Preview:")
         st.dataframe(df.head())
 
