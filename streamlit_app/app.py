@@ -104,39 +104,78 @@ def call_api(features_list, model_selected):
 # ============================
 # API CALL (BATCH)
 # ============================
-def predict_in_chunks(df, model_name="rf", chunk_size=8000):
-    total = len(df)
-    chunks = math.ceil(total / chunk_size)
+def predict_in_chunks(df, model_name="rf", chunk_size=4000):
+    import math
+    import time
+    import requests
+    import streamlit as st
+
+    n = len(df)
+    chunks = math.ceil(n / chunk_size)
 
     preds = []
     probs = []
 
+    st.info(f"Processing {n:,} rows in {chunks} chunks (~{chunk_size} rows/chunk).")
     progress = st.progress(0)
     status = st.empty()
-    t0 = time.time()
+
+    start_time = time.time()
 
     for i in range(chunks):
-        start = i * chunk_size
-        end = min((i + 1) * chunk_size, total)
-        batch = df.iloc[start:end].values.tolist()
+        s = i * chunk_size
+        e = min((i + 1) * chunk_size, n)
 
+        batch = df.iloc[s:e].values.tolist()
         payload = {"features": batch}
 
-        r = requests.post(f"{API_BATCH}?model={model_name}", json=payload)
-        out = r.json()
+        # backend call
+        try:
+            r = requests.post(
+                f"{API_BATCH}?model={model_name}",
+                json=payload,
+                timeout=300
+            )
+        except Exception as err:
+            st.error(f"Network/timeout error at chunk {i+1}: {err}")
+            return None
+
+        # parse backend response
+        try:
+            out = r.json()
+        except:
+            st.error(f"Backend returned non-JSON at chunk {i+1}: {r.text}")
+            return None
+
+        # SAFETY CHECK: avoid KeyError
+        if "predictions" not in out:
+            st.error(f"Backend error at chunk {i+1}: {out}")
+            return None
 
         preds.extend(out["predictions"])
         probs.extend(out["probabilities"])
 
-        progress.progress(end / total)
-        elapsed = time.time() - t0
-        eta = (elapsed / end) * (total - end)
-        status.text(f"Processed {end}/{total} rows — ETA {eta/60:.2f} mins")
+        # update UI progress
+        progress.progress(e / n)
 
+        elapsed = time.time() - start_time
+        remaining = n - e
+        if e > 0:
+            eta = (elapsed / e) * remaining
+        else:
+            eta = 0
+
+        status.text(
+            f"Chunk {i+1}/{chunks} processed — {e:,}/{n:,} rows "
+            f"— ETA {eta/60:.2f} min"
+        )
+
+    # attach results to original dataframe
     df["prediction"] = preds
     df["fraud_probability"] = probs
 
     return df
+
 
 # ============================
 # MODE 1 — MANUAL INPUT
