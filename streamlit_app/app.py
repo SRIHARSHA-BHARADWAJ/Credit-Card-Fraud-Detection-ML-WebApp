@@ -26,7 +26,7 @@ st.set_page_config(
 # API URLS
 # ============================
 API_SINGLE = "https://credit-card-fraud-detection-ml-webapp.onrender.com/predict"
-API_BATCH = "https://credit-card-fraud-detection-ml-webapp.onrender.com/predict_batch"
+API_BATCH = "https://credit-card-fraud-detection-ml-webapp.onrender.com/predict-batch"
 API_MODELS = "https://credit-card-fraud-detection-ml-webapp.onrender.com/get-models"
 
 # ============================
