@@ -1,4 +1,4 @@
-<p align="center"><img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=900&size=40&duration=2000&pause=500&color=00D8FF&center=true&vCenter=true&width=1000&lines=CREDIT+CARD+FRAUD+DETECTION;FASTAPI+%7C+STREAMLIT+%7C+MACHINE+LEARNING;REAL-TIME+AND+BATCH+INFERENCE+SYSTEM" /></p>
+<p align="center"><img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=900&size=38&duration=1800&pause=400&color=00E5FF&background=00000000&center=true&vCenter=true&width=1100&lines=CREDIT+CARD+FRAUD+DETECTION;FASTAPI+%2B+STREAMLIT+%2B+MACHINE+LEARNING;30-FEATURE+MODEL+INFERENCE+PIPELINE;REAL-TIME+AND+BULK+PREDICTION+SYSTEM" /></p>
 
 <div align="center" style="margin-top:18px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
 
