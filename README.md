@@ -26,7 +26,7 @@
 
 ---
 
-## 🧠 Project Overview — Ultra-Grade System
+## 🧠 Project Overview — Ultra‑Grade System
 
 A fully engineered **Credit Card Fraud Detection System** built using:
 
