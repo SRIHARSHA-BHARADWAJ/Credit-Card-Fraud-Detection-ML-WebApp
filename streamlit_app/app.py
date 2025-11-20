@@ -11,7 +11,8 @@ from utils_plots import (
     plot_confusion_matrix
 )
 
-result = {}
+# GLOBAL STORAGE
+y_true_global = None   # holds labels for visualization later
 
 # ============================
 # CONFIGURE PAGE
@@ -78,13 +79,8 @@ try:
 except:
     models = ["logreg", "rf"]
 
-model = st.sidebar.radio(
-    "Select a Machine Learning Model:",
-    models,
-    index=0,
-)
+model = st.sidebar.radio("Select a Machine Learning Model:", models, index=0)
 
-st.sidebar.write("---")
 mode = st.sidebar.selectbox(
     "Choose Input Method:",
     ["Manual Input (5-6 values)", "Upload CSV File (FAST MODE)"]
@@ -104,12 +100,7 @@ def call_api(features_list, model_selected):
 # ============================
 # API CALL (BATCH)
 # ============================
-def predict_in_chunks(df, model_name="rf", chunk_size=3000):
-    import math
-    import time
-    import requests
-    import streamlit as st
-
+def predict_in_chunks(df, model_name="rf", chunk_size=4000):
     n = len(df)
     chunks = math.ceil(n / chunk_size)
 
@@ -129,7 +120,6 @@ def predict_in_chunks(df, model_name="rf", chunk_size=3000):
         batch = df.iloc[s:e].values.tolist()
         payload = {"features": batch}
 
-        # backend call
         try:
             r = requests.post(
                 f"{API_BATCH}?model={model_name}",
@@ -140,14 +130,12 @@ def predict_in_chunks(df, model_name="rf", chunk_size=3000):
             st.error(f"Network/timeout error at chunk {i+1}: {err}")
             return None
 
-        # parse backend response
         try:
             out = r.json()
         except:
             st.error(f"Backend returned non-JSON at chunk {i+1}: {r.text}")
             return None
 
-        # SAFETY CHECK: avoid KeyError
         if "predictions" not in out:
             st.error(f"Backend error at chunk {i+1}: {out}")
             return None
@@ -155,27 +143,21 @@ def predict_in_chunks(df, model_name="rf", chunk_size=3000):
         preds.extend(out["predictions"])
         probs.extend(out["probabilities"])
 
-        # update UI progress
         progress.progress(e / n)
 
         elapsed = time.time() - start_time
-        remaining = n - e
-        if e > 0:
-            eta = (elapsed / e) * remaining
-        else:
-            eta = 0
+        eta = (elapsed / e) * (n - e) if e > 0 else 0
+        status.text(f"Chunk {i+1}/{chunks} processed — {e}/{n} rows — ETA {eta/60:.2f} mins")
 
-        status.text(
-            f"Chunk {i+1}/{chunks} processed — {e:,}/{n:,} rows "
-            f"— ETA {eta/60:.2f} min"
-        )
-
-    # attach results to original dataframe
     df["prediction"] = preds
     df["fraud_probability"] = probs
 
-    return df
+    # attach ground-truth labels if available
+    global y_true_global
+    if y_true_global is not None:
+        df["true_label"] = y_true_global.iloc[:len(df)]
 
+    return df
 
 # ============================
 # MODE 1 — MANUAL INPUT
@@ -184,7 +166,6 @@ if mode == "Manual Input (5-6 values)":
     st.subheader("🧮 Manual Input Mode")
 
     col1, col2 = st.columns(2)
-
     with col1:
         f1 = st.number_input("Feature 1", 0.0)
         f2 = st.number_input("Feature 2", 0.0)
@@ -195,11 +176,9 @@ if mode == "Manual Input (5-6 values)":
         f5 = st.number_input("Feature 5", 0.0)
         f6 = st.number_input("Feature 6", 0.0)
 
-    if st.button("🚀 Predict Fraud", use_container_width=True):
+    if st.button("🚀 Predict Fraud"):
         features = [f1, f2, f3, f4, f5, f6] + [0.0] * 24
-
-        with st.spinner("Analyzing transaction..."):
-            result, status = call_api(features, model)
+        result, status = call_api(features, model)
 
         if status == 200:
             pred = result['prediction']
@@ -209,15 +188,12 @@ if mode == "Manual Input (5-6 values)":
             st.subheader("🔍 Prediction Result")
 
             if pred == 1:
-                st.error("⚠️ **FRAUD DETECTED**")
+                st.error("⚠️ FRAUD DETECTED")
             else:
-                st.success("✅ **Legitimate Transaction**")
+                st.success("✅ Legitimate Transaction")
 
             st.markdown(f"<p class='probability-box'>Fraud Probability: {prob}</p>", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
-
-        else:
-            st.error("API Error!")
 
 # ============================
 # MODE 2 — BATCH CSV
@@ -230,22 +206,22 @@ if mode == "Upload CSV File (FAST MODE)":
     if uploaded_file:
         df = pd.read_csv(uploaded_file)
 
-        # Remove Class column if present
+        # SAVE TRUE LABELS IF PRESENT
+        global y_true_global
+        y_true_global = None
         if "Class" in df.columns:
-            df = df.drop(columns=["Class"])
+            y_true_global = df["Class"].copy()
 
-# Ensure only 30 feature columns are used
+        # keep only first 30 input feature columns
+        df = df.drop(columns=["Class"], errors="ignore")
         df = df.iloc[:, :30]
 
         st.write("### Preview:")
         st.dataframe(df.head())
 
-        if st.button("🚀 Predict for All Rows", use_container_width=True):
-            st.write("Running fast batch predictions...")
+        if st.button("🚀 Predict for All Rows"):
+            out_df = predict_in_chunks(df, model_name=model)
 
-            out_df = predict_in_chunks(df, model_name=model, chunk_size=8000)
-
-            st.success("Batch Prediction Complete!")
             if out_df is None:
                 st.error("Batch prediction failed — check backend logs.")
                 st.stop()
@@ -253,13 +229,20 @@ if mode == "Upload CSV File (FAST MODE)":
             st.success("Batch Prediction Complete!")
             st.dataframe(out_df.head())
 
-
-            # Download CSV
             csv = out_df.to_csv(index=False).encode("utf-8")
             st.download_button("📥 Download Predictions CSV", csv, "predictions.csv", "text/csv")
 
 # ============================
-# VISUALIZATION PLACEHOLDER
+# VISUALIZATION BLOCK
 # ============================
 st.subheader("📊 Model Performance Visualizations")
-st.info("📌 Visualizations will appear here when batch prediction includes ground-truth labels.")
+
+if y_true_global is not None:
+    try:
+        plot_roc_curve(y_true_global, out_df["fraud_probability"])
+        plot_precision_recall(y_true_global, out_df["fraud_probability"])
+        plot_confusion_matrix(y_true_global, out_df["prediction"])
+    except:
+        st.info("Visualization failed due to missing or invalid prediction data.")
+else:
+    st.info("📌 Visualizations appear only when your CSV contains the 'Class' column.")
