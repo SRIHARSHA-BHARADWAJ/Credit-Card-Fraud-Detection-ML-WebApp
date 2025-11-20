@@ -61,16 +61,74 @@ st.write("")
 st.sidebar.header("⚙️ Choose Model")
 
 try:
-    models = requests.get(API_MODELS).json().get("available_models", ["logreg", "rf"])
-except:
+    models = requests.get(API_MODELS, timeout=5).json().get("available_models", ["logreg", "rf"])
+except Exception:
     models = ["logreg", "rf"]
 
 model = st.sidebar.radio("Select a Machine Learning Model:", models, index=0)
 
 mode = st.sidebar.selectbox(
     "Choose Input Method:",
-    ["Manual Input (5-6 values)", "Upload CSV File (FAST MODE)"]
+    ["Manual Input (6 values, rest zeros)", "Upload CSV File (FAST MODE)"]
 )
+
+# ===================================================
+# FEATURE ORDER HANDLING
+# ===================================================
+# We'll default to Kaggle-style order: V1..V28, Amount, Time
+KAGGLE_ORDER = [f"V{i}" for i in range(1, 29)] + ["Amount", "Time"]
+
+
+def prepare_features_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Return a dataframe with exactly 30 features in the order expected by the backend.
+
+    Strategy:
+    1. If df already contains named columns V1..V28/Amount/Time in any order, pick them and reorder to KAGGLE_ORDER.
+    2. If df has no V* columns but has 30 numeric columns (after dropping Class), take the first 30 numeric columns.
+    3. If fewer than 30 columns exist, pad with zeros (not ideal, but keeps pipeline working).
+    """
+    df_local = df.copy()
+
+    # Drop Class if present
+    if "Class" in df_local.columns:
+        df_local = df_local.drop(columns=["Class"])
+
+    # Reset index to avoid alignment issues
+    df_local = df_local.reset_index(drop=True)
+
+    # Case 1: contains V1..V28 or Amount/Time
+    present = [c for c in KAGGLE_ORDER if c in df_local.columns]
+    if len(present) >= 2:
+        # build columns list that are available, fill missing with zeros
+        cols = []
+        for c in KAGGLE_ORDER:
+            if c in df_local.columns:
+                cols.append(c)
+            else:
+                # create zero column for missing
+                df_local[c] = 0.0
+                cols.append(c)
+        feat_df = df_local[cols]
+        return feat_df
+
+    # Case 2: no V* columns but many numeric columns
+    numeric_cols = df_local.select_dtypes(include=["number"]).columns.tolist()
+    if len(numeric_cols) >= 30:
+        feat_df = df_local[numeric_cols[:30]]
+        feat_df.columns = KAGGLE_ORDER  # rename to expected names
+        return feat_df
+
+    # Case 3: fewer columns -> take what we have, then pad
+    feat_df = df_local.copy()
+    needed = 30 - feat_df.shape[1]
+    for i in range(needed):
+        feat_df[f"pad_{i}"] = 0.0
+
+    # Ensure 30 columns
+    feat_df = feat_df.iloc[:, :30]
+    feat_df.columns = KAGGLE_ORDER
+    return feat_df
+
 
 # ===================================================
 # SINGLE PREDICTION
@@ -78,18 +136,22 @@ mode = st.sidebar.selectbox(
 def call_api(features_list, model_selected):
     payload = {"features": features_list}
     try:
-        resp = requests.post(f"{API_SINGLE}?model={model_selected}", json=payload)
+        resp = requests.post(f"{API_SINGLE}?model={model_selected}", json=payload, timeout=10)
         return resp.json(), resp.status_code
-    except:
-        return {"error": "Server unreachable"}, 500
+    except Exception as e:
+        return {"error": f"Server unreachable: {e}"}, 500
+
 
 # ===================================================
 # BATCH PREDICTION
 # ===================================================
 def predict_in_chunks(df, model_name="rf", chunk_size=4000):
 
-    n = len(df)
-    chunks = math.ceil(n / chunk_size)
+    # prepare features (reorder / pad)
+    feat_df = prepare_features_df(df)
+
+    n = len(feat_df)
+    chunks = math.ceil(n / chunk_size) if n > 0 else 0
 
     preds = []
     probs = []
@@ -103,7 +165,7 @@ def predict_in_chunks(df, model_name="rf", chunk_size=4000):
         s = i * chunk_size
         e = min((i + 1) * chunk_size, n)
 
-        batch = df.iloc[s:e].values.tolist()
+        batch = feat_df.iloc[s:e].values.tolist()
         payload = {"features": batch}
 
         try:
@@ -118,7 +180,7 @@ def predict_in_chunks(df, model_name="rf", chunk_size=4000):
 
         try:
             out = r.json()
-        except:
+        except Exception:
             st.error(f"Backend returned non-JSON at chunk {i+1}: {r.text}")
             return None
 
@@ -127,31 +189,38 @@ def predict_in_chunks(df, model_name="rf", chunk_size=4000):
             return None
 
         preds.extend(out["predictions"])
-        probs.extend(out["probabilities"])
+        probs.extend(out.get("probabilities", [None] * (e - s)))
 
-        progress.progress(e / n)
+        progress.progress(e / n if n else 1.0)
 
         elapsed = time.time() - start_time
         eta = (elapsed / e) * (n - e) if e > 0 else 0
         status.text(f"Chunk {i+1}/{chunks} — {e}/{n} rows — ETA {eta/60:.2f} mins")
 
-    df["prediction"] = preds
-    df["fraud_probability"] = probs
+    # build output df: take original df (reset index) and append cols
+    out_df = df.reset_index(drop=True).copy()
+    out_df = out_df.iloc[:n]  # ensure length matches features
 
-    # attach true labels
+    out_df["prediction"] = preds
+    out_df["fraud_probability"] = probs
+
+    # attach true labels (reset index to align)
     if st.session_state.y_true is not None:
-        df["true_label"] = st.session_state.y_true.iloc[:len(df)]
+        y = st.session_state.y_true.reset_index(drop=True)
+        out_df["true_label"] = y.iloc[:len(out_df)].values
 
     # save for visualization
-    st.session_state.out_df = df
-    return df
+    st.session_state.out_df = out_df
+    return out_df
+
 
 # ===================================================
 # MANUAL MODE
 # ===================================================
-if mode == "Manual Input (5-6 values)":
+if mode == "Manual Input (6 values, rest zeros)":
     st.subheader("🧮 Manual Input Mode")
 
+    # Keep the original lightweight manual input (6 values) and pad rest
     col1, col2 = st.columns(2)
     with col1:
         f1 = st.number_input("Feature 1", 0.0)
@@ -163,12 +232,15 @@ if mode == "Manual Input (5-6 values)":
         f6 = st.number_input("Feature 6", 0.0)
 
     if st.button("🚀 Predict Fraud"):
+        # build a 30-length feature vector (KAGGLE_ORDER). We'll place the 6 manual inputs in the first 6 V* positions.
         features = [f1, f2, f3, f4, f5, f6] + [0.0] * 24
+
+        # call API
         result, status = call_api(features, model)
 
         if status == 200:
-            pred = result["prediction"]
-            prob = result["fraud_probability"]
+            pred = result.get("prediction")
+            prob = result.get("fraud_probability")
 
             st.markdown("<div class='result-card'>", unsafe_allow_html=True)
             st.subheader("🔍 Prediction Result")
@@ -180,6 +252,9 @@ if mode == "Manual Input (5-6 values)":
 
             st.markdown(f"<p class='probability-box'>Fraud Probability: {prob}</p>", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.error(f"Request failed: {result.get('error') or result}")
+
 
 # ===================================================
 # CSV UPLOAD MODE
@@ -190,15 +265,24 @@ if mode == "Upload CSV File (FAST MODE)":
     uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
     if uploaded_file:
-        df = pd.read_csv(uploaded_file)
+        try:
+            df = pd.read_csv(uploaded_file)
+        except Exception as e:
+            st.error(f"Failed to read CSV: {e}")
+            st.stop()
 
-        # store true labels
+        # store true labels (if present) BEFORE dropping
         st.session_state.y_true = df["Class"].copy() if "Class" in df.columns else None
 
-        df = df.drop(columns=["Class"], errors="ignore").iloc[:, :30]
+        # show original columns
+        st.write("### Columns detected:")
+        st.write(df.columns.tolist())
 
-        st.write("### Preview:")
-        st.dataframe(df.head())
+        # prepare features for display and for sending
+        feat_df = prepare_features_df(df)
+
+        st.write("### Preview (prepared features sent to model):")
+        st.dataframe(feat_df.head())
 
         if st.button("🚀 Predict for All Rows"):
             out_df = predict_in_chunks(df, model_name=model)
@@ -218,12 +302,36 @@ if mode == "Upload CSV File (FAST MODE)":
 # ===================================================
 st.subheader("📊 Model Performance Visualizations")
 
+# make sure y_true and out_df exist and align
 if st.session_state.y_true is not None and st.session_state.out_df is not None:
     try:
-        plot_roc_curve(st.session_state.y_true, st.session_state.out_df["fraud_probability"])
-        plot_precision_recall(st.session_state.y_true, st.session_state.out_df["fraud_probability"])
-        plot_confusion_matrix(st.session_state.y_true, st.session_state.out_df["prediction"])
+        y = st.session_state.y_true.reset_index(drop=True).iloc[:len(st.session_state.out_df)]
+        probs = st.session_state.out_df["fraud_probability"].astype(float)
+        preds = st.session_state.out_df["prediction"].astype(int)
+
+        # quick diagnostics
+        st.write("### Diagnostics")
+        st.write("Unique predictions:", preds.unique().tolist())
+        st.write("Unique probabilities (sample):", list(pd.Series(probs).dropna().unique()[:10]))
+
+        if pd.Series(probs).dropna().nunique() < 2:
+            st.warning("Not enough variation in predicted probabilities to generate ROC/PR curves. Check model or feature ordering.")
+        else:
+            plot_roc_curve(y, probs)
+            plot_precision_recall(y, probs)
+
+        # confusion matrix needs discrete preds
+        if preds.nunique() < 2:
+            st.warning("Predictions are all the same class — confusion matrix will be uninformative.")
+        else:
+            plot_confusion_matrix(y, preds)
+
     except Exception as e:
         st.error(f"Visualization error: {e}")
 else:
-    st.info("📌 Visualizations appear only after a batch prediction **and** only when CSV contains the 'Class' label column.")
+    st.info("📌 Visualizations appear only after a batch prediction **and** only when CSV contains the 'Class' label column or you previously uploaded a file with labels.")
+
+
+# ===================================================
+# END
+# ===================================================
