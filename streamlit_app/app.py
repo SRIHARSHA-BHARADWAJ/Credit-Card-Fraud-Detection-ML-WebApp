@@ -230,7 +230,7 @@ if y_true_global is not None and out_df_global is not None:
         plot_roc_curve(y_true_global, out_df_global["fraud_probability"])
         plot_precision_recall(y_true_global, out_df_global["fraud_probability"])
         plot_confusion_matrix(y_true_global, out_df_global["prediction"])
-    except:
-        st.warning("Visualization failed due to missing or invalid values.")
+    except Exception as e:
+        st.error(f"Visualization error: {e}")
 else:
-    st.info("📌 Upload a CSV containing 'Class' column to view performance visualizations.")
+    st.info("📌 Visualizations appear only after batch prediction AND only when CSV contains the 'Class' column.")
