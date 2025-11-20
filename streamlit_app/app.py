@@ -191,29 +191,34 @@ if mode == "Upload CSV File (FAST MODE)":
     uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
     if uploaded_file:
-        df = pd.read_csv(uploaded_file)
+    df = pd.read_csv(uploaded_file)
 
-        # store true labels
+    # store true labels
+    y_true_global = df["Class"].copy() if "Class" in df.columns else None
+
+    df = df.drop(columns=["Class"], errors="ignore").iloc[:, :30]
+
+    st.write("### Preview:")
+    st.dataframe(df.head())
+
+    if st.button("🚀 Predict for All Rows"):
+        out_df = predict_in_chunks(df, model_name=model)
+
+        if out_df is None:
+            st.error("Batch prediction failed — check backend logs.")
+            st.stop()
+
+        st.success("Batch Prediction Complete!")
+        st.dataframe(out_df.head())
+
+        # ⭐ Store for plotting later
         
-        y_true_global = df["Class"].copy() if "Class" in df.columns else None
+        out_df_global = out_df
 
-        df = df.drop(columns=["Class"], errors="ignore").iloc[:, :30]
+        # Download CSV
+        csv = out_df.to_csv(index=False).encode("utf-8")
+        st.download_button("📥 Download Predictions CSV", csv, "predictions.csv", "text/csv")
 
-        st.write("### Preview:")
-        st.dataframe(df.head())
-
-        if st.button("🚀 Predict for All Rows"):
-            out_df = predict_in_chunks(df, model_name=model)
-
-            if out_df is None:
-                st.error("Batch prediction failed — check backend logs.")
-                st.stop()
-
-            st.success("Batch Prediction Complete!")
-            st.dataframe(out_df.head())
-
-            csv = out_df.to_csv(index=False).encode("utf-8")
-            st.download_button("📥 Download Predictions CSV", csv, "predictions.csv", "text/csv")
 
 # ===================================================
 # VISUALIZATION BLOCK
