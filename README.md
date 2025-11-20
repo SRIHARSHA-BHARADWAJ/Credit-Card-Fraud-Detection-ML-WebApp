@@ -1,13 +1,14 @@
 <div align="center" style="padding:20px 0 10px 0;">
-  <img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=900&size=34&duration=1300&pause=300&color=00E5FF&center=true&vCenter=true&width=1100&lines=CREDIT+CARD+FRAUD+DETECTION;MACHINE+LEARNING+PIPELINE;REAL-TIME+%2B+BATCH+PREDICTION"</div>
+  <img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=900&size=34&duration=1300&pause=300&color=00E5FF&center=true&vCenter=true&width=1100&lines=CREDIT+CARD+FRAUD+DETECTION;MACHINE+LEARNING+PIPELINE;REAL-TIME+%2B+BATCH+PREDICTION"" />
+</div>
 
-<div align="center" style="height:4px; width:330px; background:linear-gradient(90deg,#00E5FF,#0078FF,#00E5FF); border-radius:6px; filter:drop-shadow(0 0 10px #00E5FF); margin-top:6px;"></div>
+<div style="height:4px; width:330px; background:linear-gradient(90deg,#00E5FF,#0078FF,#00E5FF); border-radius:6px; filter:drop-shadow(0 0 10px #00E5FF); margin-top:6px;"></div>
 
-<div align="center" style="font-size:15.5px; color:#8fa3b5; margin-top:14px; margin-bottom:22px; max-width:850px; line-height:1.45;">
+<div style="font-size:15.5px; color:#8fa3b5; margin-top:14px; margin-bottom:22px; max-width:850px; line-height:1.45;">
 A clean, production‑aligned fraud detection stack powered by FastAPI, Streamlit, and optimized ML inference using a strict 30‑feature transaction signature.
 </div>
 
-<div align="center" style="margin-top:18px; display:flex; gap:18px; justify-content:center; flex-wrap:wrap;">
+<div style="margin-top:18px; display:flex; gap:18px; justify-content:center; flex-wrap:wrap;">
 
 <a href="https://credit-card-fraud-detection-ml-webapp.onrender.com/docs" target="_blank" style="text-decoration:none;">
   <img src="https://img.shields.io/badge/FASTAPI%20DOCS-000000?style=for-the-badge&logo=fastapi&logoColor=00FFAA" />
