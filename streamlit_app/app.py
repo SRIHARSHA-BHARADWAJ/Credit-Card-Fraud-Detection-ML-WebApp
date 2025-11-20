@@ -1,12 +1,12 @@
 # app.py
-# Final Premium Hybrid Theme — Cyan + Subtle Green Accent
-# - Dark liquid-glass UI
-# - Hybrid cyan + green accent
-# - Manual + CSV bulk prediction
-# - Robust backend method fallback (handles 405)
-# - Animated SVG gauge, sensitivity slider, compact professional text
-# - Developer credit (professional)
-# - Feature-ordering/padding logic retained
+# FINAL FORM — Single-Center Modular Layout (Hybrid Cyan + Subtle Green Accent)
+# - Centered animated gauge at top
+# - Manual inputs & trigger below gauge
+# - Collapsible CSV batch scoring block
+# - Logs inside an expander (hidden by default)
+# - Robust backend fallback (handles 405)
+# - Feature-ordering/padding logic preserved
+# - Compact, no empty glass blocks, ultra-premium dark styling
 
 import streamlit as st
 import requests
@@ -23,91 +23,84 @@ st.set_page_config(
     page_title="Credit Card Fraud Detection",
     page_icon="💳",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # ----------------------------
-# Hybrid accent CSS (cyan + subtle green) — premium dark
+# Ultra-polished centered CSS (hybrid cyan + green)
 # ----------------------------
 st.markdown(
     """
     <style>
     :root{
       --bg: #06080a;
-      --panel: rgba(255,255,255,0.03);
-      --glass: rgba(255,255,255,0.035);
       --muted: #98a3ad;
       --accent-cyan: #00b7ff;
       --accent-green: #6aff88;
-      --soft-white: rgba(245,248,250,0.95);
+      --white-soft: rgba(245,248,250,0.96);
     }
-
     html, body, .stApp {
-      background: radial-gradient(1000px 500px at 8% 12%, rgba(3,7,15,0.36), transparent 6%),
-                  radial-gradient(800px 450px at 92% 88%, rgba(2,6,10,0.32), transparent 6%),
-                  var(--bg);
-      color: var(--soft-white);
+      background:
+        radial-gradient(900px 420px at 8% 12%, rgba(4,8,12,0.36), transparent 8%),
+        radial-gradient(700px 380px at 92% 88%, rgba(6,10,14,0.28), transparent 8%),
+        var(--bg);
+      color: var(--white-soft);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
 
-    /* Hero */
-    .hero {
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    /* center container */
+    .center-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 18px;
+      margin-bottom: 6px;
+    }
+
+    .center-panel {
+      width: 980px;
+      max-width: calc(100% - 40px);
       border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.04);
-      backdrop-filter: blur(8px) saturate(120%);
-      margin-bottom: 14px;
-    }
-    .title {
-      font-size: 36px;
-      font-weight: 800;
-      margin: 0;
-      letter-spacing: -0.4px;
-    }
-    .subtitle { color: var(--muted); margin-top:6px; font-size:13px; }
-
-    /* Card */
-    .card {
+      padding: 18px 22px;
       background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01));
-      border-radius: 12px;
-      padding: 14px;
-      border: 1px solid rgba(255,255,255,0.03);
-      box-shadow: 0 6px 22px rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
-      transition: transform .16s ease, box-shadow .16s ease;
-    }
-    .card:hover { transform: translateY(-3px); box-shadow: 0 20px 48px rgba(0,0,0,0.65); }
-
-    /* Buttons */
-    .stButton>button {
-      background: linear-gradient(90deg, rgba(0,183,255,0.10), rgba(106,255,136,0.06));
-      border: 1px solid rgba(0,183,255,0.08);
-      color: var(--soft-white);
-      padding: 9px 14px;
-      border-radius: 10px;
-      font-weight: 800;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.035);
+      box-shadow: 0 18px 48px rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px) saturate(120%);
     }
 
-    .muted { color: var(--muted); font-size:13px; }
-    .small { font-size:12px; color:var(--muted); }
+    /* header row */
+    .hdr {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .hdr-title { font-size:28px; font-weight:800; margin:0; }
+    .hdr-sub { color:var(--muted); font-size:13px; }
 
-    /* Badges */
-    .badge-low { background: rgba(106,255,136,0.05); color: #05a457; padding:6px 10px; border-radius:999px; font-weight:700; border:1px solid rgba(106,255,136,0.06); }
-    .badge-med { background: rgba(0,183,255,0.05); color: #0aa6ff; padding:6px 10px; border-radius:999px; font-weight:700; border:1px solid rgba(0,183,255,0.06); }
-    .badge-high { background: rgba(255,90,90,0.05); color: #ff6b6b; padding:6px 10px; border-radius:999px; font-weight:800; border:1px solid rgba(255,90,90,0.08); box-shadow:0 6px 20px rgba(255,90,90,0.04); }
+    /* main gauge area */
+    .gauge-stage { display:flex; gap:24px; align-items:center; justify-content:center; padding:12px 6px; }
+    .gauge-card { min-width:320px; display:flex; flex-direction:column; align-items:center; gap:6px; }
 
-    .credit { text-align:center; color:var(--muted); font-size:13px; margin-top:18px; }
-    .credit a { color: var(--accent-cyan); font-weight:700; text-decoration:none; }
+    /* input group */
+    .inputs-row { display:flex; gap:12px; justify-content:center; margin-top:6px; flex-wrap:wrap; }
+    .input-col { display:flex; flex-direction:column; gap:8px; min-width:220px; }
 
-    .gauge-wrap { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; }
+    /* compact controls */
+    .run-btn > button { background: linear-gradient(90deg, rgba(0,183,255,0.10), rgba(106,255,136,0.06)); border-radius:10px; padding:8px 12px; border:1px solid rgba(0,183,255,0.06); font-weight:800; color:var(--white-soft); }
+    .muted { color:var(--muted); font-size:13px; }
 
-    .divider { height:1px; width:100%; background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); margin:10px 0; }
+    /* badges */
+    .badge { padding:6px 10px; border-radius:999px; font-weight:800; }
+    .badge-low { background: rgba(106,255,136,0.04); color:#05a457; border:1px solid rgba(106,255,136,0.06); }
+    .badge-med { background: rgba(0,183,255,0.03); color:#0aa6ff; border:1px solid rgba(0,183,255,0.05); }
+    .badge-high { background: rgba(255,90,90,0.04); color:#ff6b6b; border:1px solid rgba(255,90,90,0.06); box-shadow: 0 10px 30px rgba(255,90,90,0.03); }
 
+    /* small footer credit */
+    .credit { text-align:center; color:var(--muted); font-size:13px; margin-top:12px; }
+    .credit a { color: var(--accent-cyan); text-decoration:none; font-weight:700; }
+
+    /* responsive */
     @media (max-width: 900px) {
-      .title { font-size: 30px; }
+      .center-panel { padding:14px; }
+      .hdr-title { font-size:22px; }
+      .gauge-card { min-width:260px; }
     }
     </style>
     """,
@@ -115,7 +108,7 @@ st.markdown(
 )
 
 # ----------------------------
-# Feature ordering helper
+# Feature ordering helper (unchanged)
 # ----------------------------
 KAGGLE_ORDER = [f"V{i}" for i in range(1, 29)] + ["Amount", "Time"]
 
@@ -143,39 +136,36 @@ def prepare_features_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # ----------------------------
-# Animated SVG gauge (hybrid colors)
+# Animated SVG gauge (refined)
 # ----------------------------
-def render_gauge(percent: float, size: int = 220) -> str:
+def render_gauge(percent: float, size: int = 260) -> str:
     p = max(0.0, min(100.0, float(percent)))
-    r = 86
+    r = 92
     circ = 2 * math.pi * r
     filled = (p / 100.0) * circ
     empty = circ - filled
     return f"""
-    <div class="gauge-wrap" style="width:{size}px">
-      <svg width="{size}" height="{size}" viewBox="0 0 220 220">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <svg width="{size}" height="{size}" viewBox="0 0 240 240">
         <defs>
-          <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id="gC" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stop-color="#6aff88"/>
             <stop offset="55%" stop-color="#00b7ff"/>
             <stop offset="100%" stop-color="#ff9a66"/>
           </linearGradient>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <g transform="translate(110,110)">
+        <g transform="translate(120,120)">
           <circle r="{r}" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="18"/>
-          <circle r="{r}" fill="none" stroke="url(#g)" stroke-width="18" stroke-linecap="round"
+          <circle r="{r}" fill="none" stroke="url(#gC)" stroke-width="18" stroke-linecap="round"
             stroke-dasharray="{filled} {empty}" stroke-dashoffset="{circ*0.25}" transform="rotate(-90)"
             style="transition: stroke-dasharray 900ms cubic-bezier(.2,.9,.3,1), stroke 900ms ease;" filter="url(#glow)"/>
-          <circle r="58" fill="rgba(10,12,14,0.6)" stroke="rgba(255,255,255,0.02)" stroke-width="1.2"/>
-          <text x="0" y="-10" text-anchor="middle" font-size="28" font-weight="800" fill="#e6f7ff">{p:.2f}%</text>
-          <text x="0" y="18" text-anchor="middle" font-size="11" fill="#98a3ad">Fraud likelihood</text>
+          <circle r="66" fill="rgba(8,10,12,0.6)" stroke="rgba(255,255,255,0.02)" stroke-width="1.2"/>
+          <text x="0" y="-10" text-anchor="middle" font-size="32" font-weight="800" fill="#e6f7ff">{p:.2f}%</text>
+          <text x="0" y="22" text-anchor="middle" font-size="12" fill="#98a3ad">Fraud likelihood</text>
         </g>
       </svg>
     </div>
@@ -183,7 +173,7 @@ def render_gauge(percent: float, size: int = 220) -> str:
 
 
 # ----------------------------
-# Backend endpoints & resilient calls
+# Backend endpoints & fallback helpers
 # ----------------------------
 API_BASE = "https://credit-card-fraud-detection-ml-webapp.onrender.com"
 API_SINGLE = API_BASE + "/predict"
@@ -269,110 +259,110 @@ if "out_df" not in st.session_state:
 if "logs" not in st.session_state:
     st.session_state.logs = []
 
-
 # ----------------------------
-# Top hero (clean)
+# Centered container layout
 # ----------------------------
-st.markdown('<div class="hero"><div style="display:flex; justify-content:space-between; align-items:center;">', unsafe_allow_html=True)
-st.markdown('<div><div class="title">Credit Card Fraud Detection</div>', unsafe_allow_html=True)
-st.markdown('</div></div>', unsafe_allow_html=True)
-st.write("")
+st.markdown('<div class="center-wrap"><div class="center-panel">', unsafe_allow_html=True)
 
-# ----------------------------
-# Sidebar controls
-# ----------------------------
-st.sidebar.markdown("### Controls")
-model = st.sidebar.radio("Model", models_list)
-mode = st.sidebar.selectbox("Mode", ["Manual (6)", "CSV Bulk"])
-sensitivity = st.sidebar.slider("Sensitivity threshold", 0.0, 100.0, 60.0, 1.0)
-show_raw = st.sidebar.checkbox("Show raw responses (debug)", value=False)
-st.sidebar.markdown("---")
-st.sidebar.markdown('<div class="small">Threshold tunes HIGH/ELEVATED classification</div>', unsafe_allow_html=True)
+# header
+st.markdown('<div class="hdr"><div><h1 class="hdr-title">Credit Card Fraud Detection</h1></div></div>', unsafe_allow_html=True)
 
-# ----------------------------
-# Main layout: left / right
-# ----------------------------
-left_col, right_col = st.columns([2, 1])
+# top gauge stage
+st.markdown('<div class="gauge-stage">', unsafe_allow_html=True)
+# show gauge (initially empty if no result)
+if st.session_state.get("last_prob") is not None:
+    st.components.v1.html(render_gauge(st.session_state.last_prob, size=260), height=340)
+else:
+    # show placeholder gauge at 0.00% so layout is stable (not empty)
+    st.components.v1.html(render_gauge(0.0, size=260), height=340)
+st.markdown('</div>', unsafe_allow_html=True)
 
-with left_col:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("Single prediction")
-    st.markdown('<div class="muted">Enter six numeric features. Remaining values are zero-padded to 30.</div>', unsafe_allow_html=True)
+# inputs area (compact)
+st.markdown('<div style="display:flex;justify-content:center;margin-top:8px;">', unsafe_allow_html=True)
+st.markdown('<div style="max-width:880px;width:100%;">', unsafe_allow_html=True)
 
-    c1, c2 = st.columns(2)
-    with c1:
-        f1 = st.number_input("Feature 1", value=0.0, format="%.6f", key="f1")
-        f2 = st.number_input("Feature 2", value=0.0, format="%.6f", key="f2")
-        f3 = st.number_input("Feature 3", value=0.0, format="%.6f", key="f3")
-    with c2:
-        f4 = st.number_input("Feature 4", value=0.0, format="%.6f", key="f4")
-        f5 = st.number_input("Feature 5", value=0.0, format="%.6f", key="f5")
-        f6 = st.number_input("Feature 6", value=0.0, format="%.6f", key="f6")
+st.markdown('<div style="display:flex;justify-content:center;align-items:flex-start;gap:20px;flex-wrap:wrap;">', unsafe_allow_html=True)
 
-    run = st.button("Run prediction")
-    if run:
-        features = [f1, f2, f3, f4, f5, f6] + [0.0] * 24
-        st.info("Requesting prediction...")
-        out, stcode = post_single_with_fallback(features, model_selected=model)
-        if stcode != 200:
-            st.error(f"Backend error (status {stcode}).")
-            st.write(out)
-            st.session_state.logs.append({"type": "error", "status": stcode, "detail": out})
-            if stcode == 405:
-                st.warning("405: Method Not Allowed. Test backend POST /predict and CORS policy.")
-                st.code(f"curl -X POST '{API_SINGLE}?model={model}' -H 'Content-Type: application/json' -d '{{\"features\":[0,0,...]}}'", language="bash")
+# input columns
+cols = st.columns([1, 1, 0.7])
+with cols[0]:
+    f1 = st.number_input("Feature 1", value=0.0, format="%.6f", key="f1")
+    f2 = st.number_input("Feature 2", value=0.0, format="%.6f", key="f2")
+with cols[1]:
+    f3 = st.number_input("Feature 3", value=0.0, format="%.6f", key="f3")
+    f4 = st.number_input("Feature 4", value=0.0, format="%.6f", key="f4")
+with cols[2]:
+    f5 = st.number_input("Feature 5", value=0.0, format="%.6f", key="f5")
+    f6 = st.number_input("Feature 6", value=0.0, format="%.6f", key="f6")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# run and sensitivity controls (compact)
+controls = st.columns([1, 0.6, 0.6])
+with controls[0]:
+    run = st.button("Run prediction", key="run_single")
+with controls[1]:
+    sensitivity = st.slider("Sensitivity", 0.0, 100.0, 60.0, 1.0)
+with controls[2]:
+    show_raw = st.checkbox("Show raw", value=False)
+
+st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+
+# handle run
+if run:
+    features = [f1, f2, f3, f4, f5, f6] + [0.0] * 24
+    st.info("Requesting prediction...")
+    out, stcode = post_single_with_fallback(features, model_selected=(st.session_state.get("model") if st.session_state.get("model") else "rf"))
+    # note: we store model selection in sidebar below; fallback used here if not set
+    if stcode != 200:
+        st.error(f"Backend error (status {stcode}).")
+        st.write(out)
+        st.session_state.logs.append({"type": "error", "status": stcode, "detail": out})
+        if stcode == 405:
+            st.warning("405: Method Not Allowed. Ensure backend accepts POST /predict and CORS allows requests.")
+            st.code(f"curl -X POST '{API_SINGLE}?model=rf' -H 'Content-Type: application/json' -d '{{\"features\":[0,0,...]}}'", language="bash")
+    else:
+        st.session_state.last_single = out
+        prob = out.get("fraud_probability", None)
+        try:
+            prob_pct = round(float(prob) * 100.0, 2) if prob is not None else None
+        except:
+            prob_pct = None
+        st.session_state.last_prob = prob_pct
+        st.success("Result")
+        if prob_pct is None:
+            st.markdown('<div class="muted">Discrete prediction only (no probability).</div>', unsafe_allow_html=True)
         else:
-            st.session_state.last_single = out
-            prob = out.get("fraud_probability", None)
-            try:
-                prob_pct = round(float(prob) * 100.0, 2) if prob is not None else None
-            except:
-                prob_pct = None
-            st.session_state.last_prob = prob_pct
-
-            st.success("Result")
-            if prob_pct is None:
-                st.markdown('<div class="muted">Discrete prediction only (no probability).</div>', unsafe_allow_html=True)
+            hp = sensitivity
+            mp = sensitivity * 0.6
+            if prob_pct >= hp:
+                st.markdown(f"<div class='badge badge-high'>HIGH — {prob_pct}%</div>", unsafe_allow_html=True)
+            elif prob_pct >= mp:
+                st.markdown(f"<div class='badge badge-med'>ELEVATED — {prob_pct}%</div>", unsafe_allow_html=True)
             else:
-                hp = sensitivity
-                mp = sensitivity * 0.6
-                if prob_pct >= hp:
-                    st.markdown(f"<div class='badge-high'>HIGH — {prob_pct}%</div>", unsafe_allow_html=True)
-                    st.markdown('<div class="muted">Action: escalate for review.</div>', unsafe_allow_html=True)
-                elif prob_pct >= mp:
-                    st.markdown(f"<div class='badge-med'>ELEVATED — {prob_pct}%</div>", unsafe_allow_html=True)
-                    st.markdown('<div class="muted">Action: require secondary verification.</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f"<div class='badge-low'>LOW — {prob_pct}%</div>", unsafe_allow_html=True)
-                    st.markdown('<div class="muted">Action: allow; monitor.</div>', unsafe_allow_html=True)
+                st.markdown(f"<div class='badge badge-low'>LOW — {prob_pct}%</div>", unsafe_allow_html=True)
+        if show_raw:
+            st.json(out)
 
-            if show_raw:
-                st.json(out)
+st.markdown('<div style="height:12px" />', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # spacer
-    st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
-
-    # CSV bulk card
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("Batch scoring (CSV)")
-    st.markdown('<div class="muted">Upload CSV. If columns match V1..V28, Amount, Time they are auto-aligned; otherwise numeric order is used.</div>', unsafe_allow_html=True)
-
-    uploaded = st.file_uploader("Upload CSV", type=["csv"])
+# CSV batch in collapsible expander
+st.markdown('<div style="display:flex;justify-content:center;margin-top:6px;">', unsafe_allow_html=True)
+with st.expander("Bulk scoring (CSV) — expand"):
+    st.markdown('<div style="padding:6px 2px;">', unsafe_allow_html=True)
+    uploaded = st.file_uploader("Upload CSV for batch scoring", type=["csv"])
     if uploaded is not None:
         try:
             df = pd.read_csv(uploaded)
         except Exception as e:
             st.error(f"Cannot read CSV: {e}")
             df = None
-
         if df is not None:
             st.write("Preview:")
             st.dataframe(df.head())
             if "Class" in df.columns:
                 st.session_state.y_true = df["Class"].copy()
-            if st.button("Run batch scoring"):
+            if st.button("Run batch scoring", key="batch_run"):
                 st.info("Preparing batches...")
                 feat_df = prepare_features_df(df)
                 n = len(feat_df)
@@ -388,7 +378,7 @@ with left_col:
                     e = min((i + 1) * chunk_size, n)
                     batch = feat_df.iloc[s:e].values.tolist()
                     status.info(f"Processing chunk {i+1}: rows {s}-{e}")
-                    out, stcode = post_batch_with_fallback(batch, model_selected=model, timeout=300)
+                    out, stcode = post_batch_with_fallback(batch, model_selected=(st.session_state.get("model") if st.session_state.get("model") else "rf"), timeout=300)
                     if stcode != 200:
                         st.error(f"Batch failed at chunk {i+1}: status {stcode}")
                         st.write(out)
@@ -411,33 +401,22 @@ with left_col:
                     st.write(f"Processed {n} rows in {time.time()-start:.2f} s")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with right_col:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("Live gauge")
-    if st.session_state.last_prob is not None:
-        st.components.v1.html(render_gauge(st.session_state.last_prob, size=260), height=320)
-        st.markdown('<div class="muted">Use sensitivity slider to tune classification thresholds.</div>', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="muted">Run a prediction to populate the gauge.</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div></div></div>', unsafe_allow_html=True)  # close center panel & wrap
 
-    st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("Session log")
+# ----------------------------
+# Floating right-side compact controls (model selection + logs expander)
+# ----------------------------
+right_col = st.sidebar
+right_col.markdown("### Settings")
+model = right_col.radio("Model", try_get_models())
+right_col.markdown("---")
+right_col.markdown("### Logs")
+with right_col.expander("Session logs (expand)"):
     if len(st.session_state.logs) == 0:
-        st.markdown('<div class="muted">No logs yet.</div>', unsafe_allow_html=True)
+        right_col.markdown('<div class="muted">No logs yet.</div>', unsafe_allow_html=True)
     else:
-        for entry in st.session_state.logs[-12:]:
-            st.write(entry)
-    st.markdown('</div>', unsafe_allow_html=True)
+        for entry in st.session_state.logs[-20:]:
+            right_col.write(entry)
 
-# Footer credit
-st.markdown(
-    """
-    <div class="credit">
-      Developed by <a href="https://github.com/SRIHARSHA-BHARADWAJ" target="_blank">SRIHARSHA-BHARADWAJ</a>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+# footer credit (minimal)
+st.markdown('<div class="credit">Developed by <a href="https://github.com/SRIHARSHA-BHARADWAJ" target="_blank">SRIHARSHA-BHARADWAJ</a></div>', unsafe_allow_html=True)
