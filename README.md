@@ -1,21 +1,21 @@
-<div align="center" style="padding:18px 0 6px 0;">
-  <img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=900&size=32&duration=1400&pause=300&color=00D4FF&center=true&vCenter=true&width=1000&lines=CREDIT+CARD+FRAUD+DETECTION;FASTAPI+%7C+STREAMLIT+%7C+ML+PIPELINE;REAL‑TIME+%2B+BATCH+PREDICTION" />
+<div align="center" style="padding:20px 0 10px 0;">
+  <img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=900&size= Thirty&duration=1300&pause=300&color=00E5FF&center=true&vCenter=true&width=1100&lines=CREDIT+CARD+FRAUD+DETECTION;FASTAPI+%7C+STREAMLIT+%7C+MACHINE+LEARNING+SYSTEM;REAL-TIME+AND+BATCH+PREDICTION" />
 </div>
 
-<div align="center" style="height:4px; width:320px; background:linear-gradient(90deg,#00E5FF,#0077FF,#00E5FF); border-radius:6px; filter:drop-shadow(0 0 8px #00E5FF); margin-top:4px; animation:underlineGlow 3s infinite ease-in-out;"></div>
+<div align="center" style="height:4px; width:330px; background:linear-gradient(90deg,#00E5FF,#0078FF,#00E5FF); border-radius:6px; filter:drop-shadow(0 0 10px #00E5FF); margin-top:6px;"></div>
 
-<div align="center" style="font-size:15px; color:#8fa3b5; margin-top:14px; margin-bottom:18px; animation:fadeInSub 1.2s ease forwards; opacity:0; max-width:850px; line-height:1.45;">
-A streamlined financial fraud detection pipeline combining a FastAPI inference backend, strict 30‑feature ML alignment, and a refined Streamlit analytics dashboard optimized for both real‑time and batch scoring.
+<div align="center" style="font-size:15.5px; color:#8fa3b5; margin-top:14px; margin-bottom:22px; max-width:850px; line-height:1.45;">
+A clean, production-aligned fraud detection stack powered by FastAPI, Streamlit, and optimized ML inference using a strict 30-feature transaction signature.
 </div>
 
-<div align="center" style="margin-top:18px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+<div align="center" style="margin-top:18px; display:flex; gap:18px; justify-content:center; flex-wrap:wrap;">
 
 <a href="https://credit-card-fraud-detection-ml-webapp.onrender.com/docs" target="_blank" style="text-decoration:none;">
-  <img src="https://img.shields.io/badge/🔥%20FASTAPI%20DOCS-111111?style=for-the-badge&logo=fastapi&logoColor=%2300FFAA&labelColor=000000" />
+  <img src="https://img.shields.io/badge/FASTAPI%20DOCS-000000?style=for-the-badge&logo=fastapi&logoColor=00FFAA" />
 </a>
 
-<a href="https://credit-card-fraud-detection-ml-webapp-gnsnbwocoytsclrh4hryvj.streamlit.app/#model-performance-visualizations" target="_blank" style="text-decoration:none;">
-  <img src="https://img.shields.io/badge/⚡%20STREAMLIT%20LIVE-0A84FF?style=for-the-badge&logo=streamlit&logoColor=white&labelColor=001122" />
+<a href="https://credit-card-fraud-detection-ml-webapp-gnsnbwocoytsclrh4hryvj.streamlit.app" target="_blank" style="text-decoration:none;">
+  <img src="https://img.shields.io/badge/STREAMLIT%20LIVE-001122?style=for-the-badge&logo=streamlit&logoColor=FF4B4B" />
 </a>
 
 </div>
